@@ -2,17 +2,15 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class CallBase(BaseModel):
+class CallCreate(BaseModel):
     title: str
-
-
-class CallCreate(CallBase):
     date: datetime
     duration: int
 
 
-class Call(CallBase):
+class Call(BaseModel):
     id: int
+    title: str
     owner_id: int
     date: datetime
     duration: int
@@ -21,21 +19,21 @@ class Call(CallBase):
         orm_mode = True
 
 
-class UserBase(BaseModel):
+class UserCreate(BaseModel):
     email: str
-
-
-class UserCreate(UserBase):
     password: str
 
 
-class UserUpdate(UserBase):
-    password: str
+class UserUpdate(BaseModel):
     profile_picture: str
 
+    class Config:
+        orm_mode = True
 
-class User(UserBase):
+
+class User(BaseModel):
     id: int
+    email: str
     calls: list[Call] = []
     profile_picture: str
 

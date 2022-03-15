@@ -15,6 +15,11 @@ def get_all_calls(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
     return crud.get_calls(db, skip=skip, limit=limit)
 
 
+@router.post('/calls/', status_code=status.HTTP_201_CREATED)
+def get_all_calls(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return {'TODO': 'create call'}
+
+
 @router.get('/calls/{call_id}')
 def get_call(call_id: int, db: Session = Depends(get_db)):
     return {'TODO': 'get call'}

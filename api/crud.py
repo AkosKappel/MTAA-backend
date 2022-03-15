@@ -40,11 +40,9 @@ def update_user(db: Session, user_id: int, request: schemas.UserUpdate):
             detail=f'User with id {user_id} not found',
         )
 
-    return request
-    # TODO: fix this
     # user.update(request)
     # db.commit()
-    # return user
+    return user.first()
 
 
 def delete_user(db: Session, user_id: int):
@@ -62,11 +60,13 @@ def delete_user(db: Session, user_id: int):
 
 def get_user_calls(db: Session, user_id: int):
     db_user = get_user(user_id=user_id, db=db)
+
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'User with id {user_id} not found',
         )
+
     return db_user.calls
 
 
@@ -90,11 +90,13 @@ def remove_user_from_call(db: Session, user_id: int, call_id: int):
 
 def get_contacts(db: Session, user_id: int):
     db_user = get_user(user_id=user_id, db=db)
+
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'User with id {user_id} not found',
         )
+
     return db_user.contacts
 
 
