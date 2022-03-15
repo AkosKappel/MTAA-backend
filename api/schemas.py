@@ -27,9 +27,6 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     profile_picture: str
 
-    class Config:
-        orm_mode = True
-
 
 class User(BaseModel):
     id: int

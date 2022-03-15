@@ -39,7 +39,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.put('/users/{user_id}', response_model=schemas.User)
 def update_user(user_id: int, request: schemas.UserUpdate, db: Session = Depends(get_db)):
-    # TODO: toto nefunguje
     return crud.update_user(user_id=user_id, request=request, db=db)
 
 

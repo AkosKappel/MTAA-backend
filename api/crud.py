@@ -40,8 +40,8 @@ def update_user(db: Session, user_id: int, request: schemas.UserUpdate):
             detail=f'User with id {user_id} not found',
         )
 
-    # user.update(request)
-    # db.commit()
+    user.update(request.dict())
+    db.commit()
     return user.first()
 
 
