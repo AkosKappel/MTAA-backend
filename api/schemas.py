@@ -36,3 +36,8 @@ class User(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Contact(BaseModel):
+    contact_id: int
+

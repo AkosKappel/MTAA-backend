@@ -12,7 +12,6 @@ calls_users = Table(
     Column('call_id', ForeignKey('calls.id'), primary_key=True)
 )
 
-
 # class CallsUsers(Base):
 #     __tablename__ = 'calls_users'
 #     user_id = Column(ForeignKey('books.id'), primary_key=True)

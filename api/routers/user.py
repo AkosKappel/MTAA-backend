@@ -60,3 +60,13 @@ def create_call_for_user(user_id: int, call: schemas.CallCreate, db: Session = D
 @router.get('/users/{user_id}/contacts/', response_model=list[schemas.User])
 def get_user_contacts(user_id: int, db: Session = Depends(get_db)):
     return crud.get_contacts(user_id=user_id, db=db)
+
+
+@router.post('/users/{user_id}/contacts/', status_code=status.HTTP_201_CREATED)
+def post_user_contact(user_id: int, request: schemas.Contact, db: Session = Depends(get_db)):
+    return crud.add_contact(user_id=user_id, request=request, db=db)
+
+
+@router.delete('/users/{user_id}/contacts/', status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_contact(user_id: int, request: schemas.Contact, db: Session = Depends(get_db)):
+    return crud.remove_contact(user_id=user_id, request=request, db=db)

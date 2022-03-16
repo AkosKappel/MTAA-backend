@@ -100,13 +100,52 @@ def get_contacts(db: Session, user_id: int):
     return db_user.contacts
 
 
-def add_contact(user_id, db: Session):
-    pass
+def add_contact(user_id, db: Session, request):
+    db_user = get_user(user_id=user_id, db=db)
+    db_contact = get_user(user_id=request.contact_id, db=db)
+
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User with id {user_id} not found',
+        )
+
+    if not db_contact:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User with id {request.contact_id} not found',
+        )
+
+    db_user.contacts.append(db_contact)
+    db.commit()
 
 
-def remove_contact(user_id, db: Session):
-    pass
+def remove_contact(user_id, db: Session, request):
+    db_user = get_user(user_id=user_id, db=db)
+    db_contact = get_user(user_id=request.contact_id, db=db)
+
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User with id {user_id} not found',
+        )
+
+    if not db_contact:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User with id {request.contact_id} not found',
+        )
+
+    if db_contact not in db_user.contacts:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User with id {user_id} does not have contact with id {request.contact_id}',
+        )
+
+    db_user.contacts.remove(db_contact)
+    db.commit()
 
 
 def get_calls(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Call).offset(skip).limit(limit).all()
+
