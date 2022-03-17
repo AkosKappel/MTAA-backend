@@ -5,6 +5,8 @@ from sqlalchemy import Table
 
 from core.database import Base
 
+# todo delete cascade vsade
+
 # association table
 calls_users = Table(
     'calls_users', Base.metadata,

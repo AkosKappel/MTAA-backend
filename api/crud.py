@@ -40,6 +40,8 @@ def update_user(db: Session, user_id: int, request: schemas.UserUpdate):
             detail=f'User with id {user_id} not found',
         )
 
+    # todo: dorobit osetrenia na heslo a email
+
     user.update(request.dict())
     db.commit()
     return user.first()
@@ -80,8 +82,32 @@ def create_user_call(db: Session, call: schemas.CallCreate, user_id: int):
     return db_call
 
 
-def add_user_to_call(db: Session, user_id: int, call_id: int):
-    pass
+# def add_user_to_call(db: Session, user_id: int, call_id: int):
+#     db_call = db.query(models.Call).filter(models.Call.id == call_id).firt()
+#     db_user = get_user(user_id=user_id, db=db)
+#
+#     if not db_user:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail=f'User with id {user_id} not found',
+#         )
+#
+#     if not db_call:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail=f'Call with id {call_id} not found',
+#         )
+#
+#     if db_user in db_call.users:
+#         raise HTTPException(
+#             status_code=status.HTTP_409_CONFLICT,  # TODO: satus ???
+#             detail=f'User with id {db_user} already in this call',
+#         )
+#
+#     db_call.users.append(db_user)
+#     db.commit()
+#     db.refresh(db_call)
+#     return db_call
 
 
 def remove_user_from_call(db: Session, user_id: int, call_id: int):
@@ -89,6 +115,7 @@ def remove_user_from_call(db: Session, user_id: int, call_id: int):
 
 
 def get_contacts(db: Session, user_id: int):
+    # todo: vracat iba email a id
     db_user = get_user(user_id=user_id, db=db)
 
     if not db_user:
@@ -114,6 +141,12 @@ def add_contact(user_id, db: Session, request):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'User with id {request.contact_id} not found',
+        )
+
+    if db_contact in db_user.contacts:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,  # TODO: satus ???
+            detail=f'User with id {request.contact_id} already in your contact list',
         )
 
     db_user.contacts.append(db_contact)
@@ -149,3 +182,58 @@ def remove_contact(user_id, db: Session, request):
 def get_calls(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Call).offset(skip).limit(limit).all()
 
+
+def get_call(call_id, db):
+    call = db.query(models.Call).filter(models.Call.id == call_id)
+
+    if not call.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Call with id {call_id} not found',
+        )
+
+    return call.first()
+
+
+def update_call(call_id, request, db):
+    call = db.query(models.Call).filter(models.Call.id == call_id)
+
+    if not call.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Call with id {call_id} not found',
+        )
+
+    # todo: iba owner vie spravit update
+
+    call.update(request.dict())
+    db.commit()
+    return call.first()
+
+
+def remove_call(call_id, db):
+    call = db.query(models.Call).filter(models.Call.id == call_id)
+
+    #todo: pridat iba owner vie mazat treba delete cascase
+
+    if not call.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Call with id {call_id} not found',
+        )
+
+    call.delete(synchronize_session=False)
+    db.commit()
+
+
+def get_users_of_call(call_id, db):
+    #todo nefunguje
+    call = db.query(models.Call).filter(models.Call.id == call_id)
+
+    if not call.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Call with id {call_id} not found',
+        )
+
+    return call.users
