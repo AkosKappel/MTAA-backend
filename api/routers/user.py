@@ -47,26 +47,26 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     return crud.delete_user(user_id=user_id, db=db)
 
 
-@router.get('/users/{user_id}/calls/', response_model=list[schemas.Call])
+@router.get('/users/calls/{user_id}', response_model=list[schemas.Call])
 def get_calls_of_user(user_id: int, db: Session = Depends(get_db)):
     return crud.get_user_calls(user_id=user_id, db=db)
 
 
-@router.post('/users/{user_id}/calls/', response_model=schemas.Call)
+@router.post('/users/calls/{user_id}', response_model=schemas.Call)
 def create_call_for_user(user_id: int, call: schemas.CallCreate, db: Session = Depends(get_db)):
     return crud.create_user_call(call=call, user_id=user_id, db=db)
 
 
-@router.get('/users/{user_id}/contacts/', response_model=list[schemas.User])
+@router.get('/users/contacts/{user_id}', response_model=list[schemas.User])
 def get_user_contacts(user_id: int, db: Session = Depends(get_db)):
     return crud.get_contacts(user_id=user_id, db=db)
 
 
-@router.post('/users/{user_id}/contacts/', status_code=status.HTTP_201_CREATED)
+@router.post('/users/contacts/{user_id}', status_code=status.HTTP_201_CREATED)
 def post_user_contact(user_id: int, request: schemas.Contact, db: Session = Depends(get_db)):
     return crud.add_contact(user_id=user_id, request=request, db=db)
 
 
-@router.delete('/users/{user_id}/contacts/', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/users/contacts/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user_contact(user_id: int, request: schemas.Contact, db: Session = Depends(get_db)):
     return crud.remove_contact(user_id=user_id, request=request, db=db)
