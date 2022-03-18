@@ -74,7 +74,7 @@ def post_call_for_user(user_id: int, call: schemas.CallCreate, db: Session = Dep
     return crud.create_user_call(call=call, user_id=user_id, db=db)
 
 
-@router.get('/users/contacts/{user_id}', response_model=list[schemas.User])
+@router.get('/users/contacts/{user_id}', response_model=list[schemas.UserBase])
 def get_user_contacts(user_id: int, db: Session = Depends(get_db)):
     return crud.get_contacts(user_id=user_id, db=db)
 

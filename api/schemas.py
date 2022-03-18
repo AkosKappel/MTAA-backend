@@ -8,13 +8,27 @@ class CallCreate(BaseModel):
     duration: int
 
 
+class UserID(BaseModel):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+class UserBase(UserID):
+    email: str
+
+    class Config:
+        orm_mode = True
+
+
 class Call(BaseModel):
     id: int
     title: str
     owner_id: int
     date: datetime
     duration: int
-    # users: list[User] = []
+    users: list[UserBase] = []
 
     class Config:
         orm_mode = True
@@ -31,9 +45,7 @@ class UserUpdate(BaseModel):
     # todo pridat password a hesh
 
 
-class User(BaseModel):
-    id: int
-    email: str
+class User(UserBase):
     calls: list[Call] = []
     profile_picture: str
 
