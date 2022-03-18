@@ -111,7 +111,31 @@ def add_user_to_call(db: Session, user_id: int, call_id: int):
 
 
 def remove_user_from_call(db: Session, user_id: int, call_id: int):
-    pass
+    db_call = db.query(models.Call).filter(models.Call.id == call_id).first()
+    db_user = get_user(user_id=user_id, db=db)
+
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User with id {user_id} not found',
+        )
+
+    if not db_call:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Call with id {call_id} not found',
+        )
+
+    if db_user not in db_call.users:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f'User with id {user_id} is not in this call',
+        )
+
+    db_call.users.remove(db_user)
+    db.commit()
+    db.refresh(db_call)
+    return db_call
 
 
 def get_contacts(db: Session, user_id: int):

@@ -22,6 +22,13 @@ class UserBase(UserID):
         orm_mode = True
 
 
+class CallUsers(BaseModel):
+    users: list[UserBase] = []
+
+    class Config:
+        orm_mode = True
+
+
 class Call(BaseModel):
     id: int
     title: str

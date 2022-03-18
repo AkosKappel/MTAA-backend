@@ -35,11 +35,11 @@ def get_users_of_call(call_id: int, db: Session = Depends(get_db)):
     return crud.get_users_of_call(call_id=call_id, db=db)
 
 
-@router.put('/calls/users/{call_id}', response_model=schemas.Call)
-def put_user_to_call(call_id: int, request: schemas.UserBase, db: Session = Depends(get_db)):
+@router.put('/calls/users/{call_id}', response_model=schemas.CallUsers)
+def put_user_to_call(call_id: int, request: schemas.UserID, db: Session = Depends(get_db)):
     return crud.add_user_to_call(call_id=call_id, user_id=request.id, db=db)
 
 
-# @router.delete('/calls/users/{call_id}', response_model=schemas.Call)
-# def delete_user_to_call(call_id: int, request: schemas.User, db: Session = Depends(get_db)):
-#     return crud.remove_user_from_call(call_id=call_id, user_id=request.id, db=db)
+@router.delete('/calls/users/{call_id}', response_model=schemas.CallUsers)
+def delete_user_to_call(call_id: int, request: schemas.UserID, db: Session = Depends(get_db)):
+    return crud.remove_user_from_call(call_id=call_id, user_id=request.id, db=db)
