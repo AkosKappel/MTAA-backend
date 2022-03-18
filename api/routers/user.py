@@ -9,6 +9,11 @@ router = APIRouter(
     tags=['users'],
 )
 
+# todo neviem aku metodu na login
+@router.get('/login/', status_code=status.HTTP_202_ACCEPTED)
+def login(request: schemas.UserCreate, db: Session = Depends(get_db)):
+    return crud.login(request, db)
+
 
 @router.get('/users/', response_model=list[schemas.User])
 def get_all_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -48,7 +53,7 @@ def post_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(user=user, db=db)
 
 
-@router.put('/users/{user_id}', response_model=schemas.User)
+@router.put('/users/{user_id}', response_model=schemas.UserUpdate, status_code=status.HTTP_200_OK)
 def put_user(user_id: int, request: schemas.UserUpdate, db: Session = Depends(get_db)):
     return crud.update_user(user_id=user_id, request=request, db=db)
 

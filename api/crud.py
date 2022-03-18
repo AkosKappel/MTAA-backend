@@ -1,7 +1,9 @@
+import string
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
-
+import hashlib
+import random
 from api import models, schemas
 
 
@@ -18,11 +20,15 @@ def get_user_by_email(db: Session, email: str):
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-    hashed_password = user.password + 'not_really_hashed'  # TODO: add salt + hashing
+    salt = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(64))
+    hashed_password = hashlib.sha256((user.password + salt).encode()).hexdigest()  # TODO: add salt + hashing
+    # print(salt)
+    # print(hashed_password.hexdigest())
+    # print(hashlib.sha256(('stefan' + salt).encode()).hexdigest())
     db_user = models.User(
         email=user.email,
         password_hash=hashed_password,
-        password_salt='not implemented',
+        password_salt=salt,
         profile_picture='not implemented',
     )
     db.add(db_user)
@@ -40,9 +46,21 @@ def update_user(db: Session, user_id: int, request: schemas.UserUpdate):
             detail=f'User with id {user_id} not found',
         )
 
-    # todo: dorobit osetrenia na heslo a email
+    # todo: dorobit osetrenia na heslo a email aby sa vedel iba owner updatnut
 
-    user.update(request.dict())
+    # todo not valid dict
+    salt = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(64))
+
+    # dic = {'profile_picture': request.profile_picture,
+    #        'email': request.email,
+    #        'password_hash': hashlib.sha256((request.password + salt).encode()).hexdigest(),
+    #        'password_salt': salt,
+    #        }
+
+    user.profile_picture = request.profile_picture
+    user.email = request.email
+    user.password_hash = hashlib.sha256((request.password + salt).encode()).hexdigest()
+    user.password_salt = salt
     db.commit()
     return user.first()
 
@@ -238,7 +256,7 @@ def update_call(call_id, request, db):
 def remove_call(call_id, db):
     call = db.query(models.Call).filter(models.Call.id == call_id)
 
-    #todo: pridat iba owner vie mazat treba delete cascase
+    # todo: pridat iba owner vie mazat treba delete cascase
 
     if not call.first():
         raise HTTPException(
@@ -251,7 +269,7 @@ def remove_call(call_id, db):
 
 
 def get_users_of_call(call_id, db):
-    #todo nefunguje
+    # todo nefunguje
     call = db.query(models.Call).filter(models.Call.id == call_id)
     print(call)
 
@@ -262,3 +280,19 @@ def get_users_of_call(call_id, db):
         )
 
     return call.first().users
+
+
+def login(request, db):
+    print('janko')
+    db_user = get_user_by_email(email=request.email, db=db)
+    if db_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User with email {request.email} not found'
+        )
+
+    if db_user.password_hash != hashlib.sha256((request.password + db_user.password_salt).encode()).hexdigest():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f'Wrong password'
+        )

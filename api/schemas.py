@@ -49,7 +49,7 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     profile_picture: str
     email: str
-    # todo pridat password a hesh
+    password: str
 
 
 class User(UserBase):
