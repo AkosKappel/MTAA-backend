@@ -43,7 +43,7 @@ def update_user(db: Session, user_id: int, request: schemas.UserUpdate):
     if not user.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found',
+            detail=f'User not found',
         )
 
     # todo: dorobit osetrenia na heslo a email aby sa vedel iba owner updatnut
@@ -71,7 +71,7 @@ def delete_user(db: Session, user_id: int):
     if not user.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found',
+            detail=f'User not found',
         )
 
     user.delete(synchronize_session=False)
@@ -84,7 +84,7 @@ def get_user_calls(db: Session, user_id: int):
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found',
+            detail=f'User not found',
         )
 
     return db_user.calls
@@ -107,19 +107,19 @@ def add_user_to_call(db: Session, user_id: int, call_id: int):
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found',
+            detail=f'User not found',
         )
 
     if not db_call:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Call with id {call_id} not found',
+            detail=f'Call not found',
         )
 
     if db_user in db_call.users:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f'User with id {user_id} already in this call',
+            detail=f'User is already in this call',
         )
 
     db_call.users.append(db_user)
@@ -135,19 +135,19 @@ def remove_user_from_call(db: Session, user_id: int, call_id: int):
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found',
+            detail=f'User not found',
         )
 
     if not db_call:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Call with id {call_id} not found',
+            detail=f'Call not found',
         )
 
     if db_user not in db_call.users:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f'User with id {user_id} is not in this call',
+            detail=f'User is not in this call',
         )
 
     db_call.users.remove(db_user)
@@ -163,7 +163,7 @@ def get_contacts(db: Session, user_id: int):
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found',
+            detail=f'User not found',
         )
 
     return db_user.contacts
@@ -176,19 +176,19 @@ def add_contact(user_id, db: Session, request):
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found',
+            detail=f'User not found',
         )
 
     if not db_contact:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {request.contact_id} not found',
+            detail=f'User not found',
         )
 
     if db_contact in db_user.contacts:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f'User with id {request.contact_id} already in your contact list',
+            detail=f'Contact is already in your contact list',
         )
 
     db_user.contacts.append(db_contact)
@@ -202,19 +202,19 @@ def remove_contact(user_id, db: Session, request):
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found',
+            detail=f'User not found',
         )
 
     if not db_contact:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {request.contact_id} not found',
+            detail=f'User not found',
         )
 
     if db_contact not in db_user.contacts:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} does not have contact with id {request.contact_id}',
+            detail=f'Contact is not in your contact list',
         )
 
     db_user.contacts.remove(db_contact)
@@ -231,7 +231,7 @@ def get_call(call_id, db):
     if not call.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Call with id {call_id} not found',
+            detail=f'Call not found',
         )
 
     return call.first()
@@ -243,7 +243,7 @@ def update_call(call_id, request, db):
     if not call.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Call with id {call_id} not found',
+            detail=f'Call not found',
         )
 
     # todo: iba owner vie spravit update
@@ -261,7 +261,7 @@ def remove_call(call_id, db):
     if not call.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Call with id {call_id} not found',
+            detail=f'Call not found',
         )
 
     call.delete(synchronize_session=False)
@@ -269,14 +269,13 @@ def remove_call(call_id, db):
 
 
 def get_users_of_call(call_id, db):
-    # todo nefunguje
     call = db.query(models.Call).filter(models.Call.id == call_id)
     print(call)
 
     if not call.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Call with id {call_id} not found',
+            detail=f'Call not found',
         )
 
     return call.first().users

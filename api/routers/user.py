@@ -26,7 +26,7 @@ def get_user_id(user_id: int, db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found'
+            detail=f'User not found'
         )
     return db_user
 
@@ -37,7 +37,7 @@ def get_user_email(email: str, db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with email {email} not found'
+            detail=f'User not found'
         )
     return db_user
 
@@ -74,7 +74,7 @@ def post_call_for_user(user_id: int, call: schemas.CallCreate, db: Session = Dep
     if db_user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with id {user_id} not found'
+            detail=f'User not found'
         )
     return crud.create_user_call(call=call, user_id=user_id, db=db)
 
