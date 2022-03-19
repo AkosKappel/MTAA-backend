@@ -6,6 +6,7 @@ import hashlib
 import random
 from api import models, schemas
 
+#todo: autentizacia nech iba owner vie menit a mazat
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
@@ -21,10 +22,7 @@ def get_user_by_email(db: Session, email: str):
 
 def create_user(db: Session, user: schemas.UserCreate):
     salt = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(64))
-    hashed_password = hashlib.sha256((user.password + salt).encode()).hexdigest()  # TODO: add salt + hashing
-    # print(salt)
-    # print(hashed_password.hexdigest())
-    # print(hashlib.sha256(('stefan' + salt).encode()).hexdigest())
+    hashed_password = hashlib.sha256((user.password + salt).encode()).hexdigest()
     db_user = models.User(
         email=user.email,
         password_hash=hashed_password,
@@ -46,9 +44,7 @@ def update_user(db: Session, user_id: int, request: schemas.UserUpdate):
             detail=f'User not found',
         )
 
-    # todo: dorobit osetrenia na heslo a email aby sa vedel iba owner updatnut
-
-    # todo not valid dict
+    # todo not valid dict nefunguje
     salt = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(64))
 
     # dic = {'profile_picture': request.profile_picture,
@@ -157,7 +153,6 @@ def remove_user_from_call(db: Session, user_id: int, call_id: int):
 
 
 def get_contacts(db: Session, user_id: int):
-    # todo: vracat iba email a id
     db_user = get_user(user_id=user_id, db=db)
 
     if not db_user:
@@ -246,8 +241,6 @@ def update_call(call_id, request, db):
             detail=f'Call not found',
         )
 
-    # todo: iba owner vie spravit update
-
     call.update(request.dict())
     db.commit()
     return call.first()
@@ -255,8 +248,6 @@ def update_call(call_id, request, db):
 
 def remove_call(call_id, db):
     call = db.query(models.Call).filter(models.Call.id == call_id)
-
-    # todo: pridat iba owner vie mazat treba delete cascase
 
     if not call.first():
         raise HTTPException(

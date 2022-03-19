@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 # todo neviem aku metodu na login
-@router.get('/login/', status_code=status.HTTP_202_ACCEPTED)
+@router.put('/login/', status_code=status.HTTP_202_ACCEPTED)
 def login(request: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.login(request, db)
 

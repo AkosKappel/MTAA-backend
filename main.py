@@ -30,7 +30,3 @@ models.Base.metadata.create_all(bind=engine)
 
 app = get_application()
 
-
-@app.get('/')
-async def root():
-    return {'message': 'Hello World'}
