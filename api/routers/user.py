@@ -22,7 +22,6 @@ def register(request: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(request=request, db=db)
 
 
-# TODO: status by nemal byt 200 ok?
 @router.post('/login/', response_model=schemas.Token, status_code=status.HTTP_202_ACCEPTED)
 def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     return crud.login(request, db)

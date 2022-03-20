@@ -4,7 +4,6 @@ from sqlalchemy.sql import func
 
 from core.database import Base
 
-# TODO delete cascade vsade nefunguje delete lebo ze sa referuje v inej tabulke (pridal som cascade neskusal ci funguje
 
 # association table
 calls_users = Table(

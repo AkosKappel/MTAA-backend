@@ -4,8 +4,6 @@ from sqlalchemy.orm import Session
 
 from api import models, schemas, hashing, JWT
 
-# TODO: autentizacia nech iba owner vie menit a mazat
-
 
 def login(request: OAuth2PasswordRequestForm, db: Session):
     db_user = get_user_by_email(email=request.username, db=db)
@@ -22,10 +20,7 @@ def login(request: OAuth2PasswordRequestForm, db: Session):
             detail=f'Incorrect password'
         )
 
-    # TODO: jwt
     access_token = JWT.create_access_token(data={'sub': db_user.email})
-
-    # return db_user
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
