@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from api import models
-from api.routers import call, user
-from core.database import engine
+from api.routers import call, user, contact
 from core.config import settings
+from core.database import engine
 
 
 def get_application():
@@ -22,6 +22,7 @@ def get_application():
 
     _app.include_router(user.router)
     _app.include_router(call.router)
+    _app.include_router(contact.router)
 
     return _app
 
@@ -29,4 +30,3 @@ def get_application():
 models.Base.metadata.create_all(bind=engine)
 
 app = get_application()
-

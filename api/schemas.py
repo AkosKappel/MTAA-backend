@@ -2,12 +2,6 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class CallCreate(BaseModel):
-    title: str
-    date: datetime
-    duration: int
-
-
 class UserID(BaseModel):
     id: int
 
@@ -41,17 +35,6 @@ class Call(BaseModel):
         orm_mode = True
 
 
-class UserCreate(BaseModel):
-    email: str
-    password: str
-
-
-class UserUpdate(BaseModel):
-    profile_picture: str
-    email: str
-    password: str
-
-
 class User(UserBase):
     calls: list[Call] = []
     profile_picture: str
@@ -64,7 +47,33 @@ class Contact(BaseModel):
     contact_id: int
 
 
-class CallUpdate(BaseModel):
+class CallCreate(BaseModel):
     title: str
     date: datetime
     duration: int
+
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+
+
+class CallUpdate(BaseModel):
+    title: str | None = None
+    date: datetime | None = None
+    duration: int | None = None
+
+
+class UserUpdate(BaseModel):
+    profile_picture: str | None = None
+    email: str | None = None
+    password: str | None = None
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    email: str | None = None

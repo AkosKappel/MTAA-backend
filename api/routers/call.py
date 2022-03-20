@@ -1,12 +1,11 @@
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, status
 from sqlalchemy.orm import Session
-from starlette import status
 
 from api import crud, schemas
 from core.database import get_db
 
 router = APIRouter(
-    tags=['calls'],
+    tags=['Calls'],
 )
 
 
@@ -16,12 +15,12 @@ def get_all_calls(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 
 @router.get('/calls/{call_id}', response_model=schemas.Call)
-def get_call(call_id: int, db: Session = Depends(get_db)):
+def get_call_by_id(call_id: int, db: Session = Depends(get_db)):
     return crud.get_call(call_id=call_id, db=db)
 
 
 @router.put('/calls/{call_id}', response_model=schemas.Call)
-def put_call(call_id: int, request: schemas.CallUpdate, db: Session = Depends(get_db)):
+def update_call(call_id: int, request: schemas.CallUpdate, db: Session = Depends(get_db)):
     return crud.update_call(call_id=call_id, request=request, db=db)
 
 
@@ -36,10 +35,10 @@ def get_users_of_call(call_id: int, db: Session = Depends(get_db)):
 
 
 @router.post('/calls/users/{call_id}', response_model=schemas.CallUsers)
-def post_user_to_call(call_id: int, request: schemas.UserID, db: Session = Depends(get_db)):
+def add_user_to_call(call_id: int, request: schemas.UserID, db: Session = Depends(get_db)):
     return crud.add_user_to_call(call_id=call_id, user_id=request.id, db=db)
 
 
 @router.delete('/calls/users/{call_id}', response_model=schemas.CallUsers)
-def delete_user_of_call(call_id: int, request: schemas.UserID, db: Session = Depends(get_db)):
+def remove_user_from_call(call_id: int, request: schemas.UserID, db: Session = Depends(get_db)):
     return crud.remove_user_from_call(call_id=call_id, user_id=request.id, db=db)

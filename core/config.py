@@ -17,5 +17,10 @@ class Settings:
     POSTGRES_DB: str = os.getenv('POSTGRES_DB')
     DATABASE_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}'
 
+    # command pre vygenerovanie secret key: openssl rand -hex 32
+    SECRET_KEY = 'ccccde617c75da86d9b3f10ff36051d35957016dbcae181f60cc6cc72ff9acad'
+    ALGORITHM = 'HS256'
+    ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 
 settings = Settings()

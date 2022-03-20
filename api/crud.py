@@ -1,12 +1,33 @@
-import string
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from starlette import status
-import hashlib
-import random
-from api import models, schemas
 
-#todo: autentizacia nech iba owner vie menit a mazat
+from api import models, schemas, hashing, JWT
+
+# TODO: autentizacia nech iba owner vie menit a mazat
+
+
+def login(request: OAuth2PasswordRequestForm, db: Session):
+    db_user = get_user_by_email(email=request.username, db=db)
+
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Invalid credentials'
+        )
+
+    if not hashing.verify(request.password, db_user.password_hash, db_user.password_salt):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f'Incorrect password'
+        )
+
+    # TODO: jwt
+    access_token = JWT.create_access_token(data={'sub': db_user.email})
+
+    # return db_user
+    return {'access_token': access_token, 'token_type': 'bearer'}
+
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
@@ -20,12 +41,11 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 
-def create_user(db: Session, user: schemas.UserCreate):
-    salt = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(64))
-    hashed_password = hashlib.sha256((user.password + salt).encode()).hexdigest()
+def create_user(db: Session, request: schemas.UserCreate):
+    salt = hashing.generate_salt()
     db_user = models.User(
-        email=user.email,
-        password_hash=hashed_password,
+        email=request.email,
+        password_hash=hashing.bcrypt(request.password, salt),
         password_salt=salt,
         profile_picture='not implemented',
     )
@@ -44,19 +64,16 @@ def update_user(db: Session, user_id: int, request: schemas.UserUpdate):
             detail=f'User not found',
         )
 
-    # todo not valid dict nefunguje
-    salt = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(64))
+    params = {k: v for k, v in request.dict().items() if v}
 
-    # dic = {'profile_picture': request.profile_picture,
-    #        'email': request.email,
-    #        'password_hash': hashlib.sha256((request.password + salt).encode()).hexdigest(),
-    #        'password_salt': salt,
-    #        }
+    if 'password' in params:
+        password = params['password']
+        del params['password']
+        salt = hashing.generate_salt()
+        params['password_hash'] = hashing.bcrypt(password, salt)
+        params['password_salt'] = salt
 
-    user.profile_picture = request.profile_picture
-    user.email = request.email
-    user.password_hash = hashlib.sha256((request.password + salt).encode()).hexdigest()
-    user.password_salt = salt
+    user.update(params)
     db.commit()
     return user.first()
 
@@ -86,7 +103,7 @@ def get_user_calls(db: Session, user_id: int):
     return db_user.calls
 
 
-def create_user_call(db: Session, call: schemas.CallCreate, user_id: int):
+def create_call_for_user(db: Session, call: schemas.CallCreate, user_id: int):
     db_call = models.Call(**call.dict(), owner_id=user_id)
     db_user = get_user(user_id=user_id, db=db)
     db_call.users.append(db_user)
@@ -164,7 +181,13 @@ def get_contacts(db: Session, user_id: int):
     return db_user.contacts
 
 
-def add_contact(user_id, db: Session, request):
+def add_contact(user_id: int, db: Session, request: schemas.Contact):
+    if user_id == request.contact_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Can not add yourself as contact',
+        )
+
     db_user = get_user(user_id=user_id, db=db)
     db_contact = get_user(user_id=request.contact_id, db=db)
 
@@ -188,9 +211,10 @@ def add_contact(user_id, db: Session, request):
 
     db_user.contacts.append(db_contact)
     db.commit()
+    return db_user.contacts
 
 
-def remove_contact(user_id, db: Session, request):
+def remove_contact(user_id, db: Session, request: schemas.Contact):
     db_user = get_user(user_id=user_id, db=db)
     db_contact = get_user(user_id=request.contact_id, db=db)
 
@@ -208,19 +232,32 @@ def remove_contact(user_id, db: Session, request):
 
     if db_contact not in db_user.contacts:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_409_CONFLICT,
             detail=f'Contact is not in your contact list',
         )
 
     db_user.contacts.remove(db_contact)
     db.commit()
+    return db_user.contacts
 
 
 def get_calls(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Call).offset(skip).limit(limit).all()
 
 
-def get_call(call_id, db):
+def get_call(call_id: int, db: Session):
+    call = db.query(models.Call).filter(models.Call.id == call_id).first()
+
+    if not call:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Call not found',
+        )
+
+    return call
+
+
+def update_call(call_id: int, request: schemas.CallUpdate, db: Session):
     call = db.query(models.Call).filter(models.Call.id == call_id)
 
     if not call.first():
@@ -229,24 +266,14 @@ def get_call(call_id, db):
             detail=f'Call not found',
         )
 
-    return call.first()
+    params = {k: v for k, v in request.dict().items() if v}
 
-
-def update_call(call_id, request, db):
-    call = db.query(models.Call).filter(models.Call.id == call_id)
-
-    if not call.first():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Call not found',
-        )
-
-    call.update(request.dict())
+    call.update(params)
     db.commit()
     return call.first()
 
 
-def remove_call(call_id, db):
+def remove_call(call_id: int, db: Session):
     call = db.query(models.Call).filter(models.Call.id == call_id)
 
     if not call.first():
@@ -259,30 +286,13 @@ def remove_call(call_id, db):
     db.commit()
 
 
-def get_users_of_call(call_id, db):
-    call = db.query(models.Call).filter(models.Call.id == call_id)
-    print(call)
+def get_users_of_call(call_id: int, db: Session):
+    call = db.query(models.Call).filter(models.Call.id == call_id).first()
 
-    if not call.first():
+    if not call:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Call not found',
         )
 
-    return call.first().users
-
-
-def login(request, db):
-    print('janko')
-    db_user = get_user_by_email(email=request.email, db=db)
-    if db_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User with email {request.email} not found'
-        )
-
-    if db_user.password_hash != hashlib.sha256((request.password + db_user.password_salt).encode()).hexdigest():
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f'Wrong password'
-        )
+    return call.users

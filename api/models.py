@@ -1,29 +1,22 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from sqlalchemy import Table
 
 from core.database import Base
 
-# todo delete cascade vsade nefunguje delete lebo ze sa referuje v inej tabulke (pridal som cascade neskusal ci funguje!!!!)
+# TODO delete cascade vsade nefunguje delete lebo ze sa referuje v inej tabulke (pridal som cascade neskusal ci funguje
 
 # association table
 calls_users = Table(
     'calls_users', Base.metadata,
-    Column('user_id', ForeignKey('users.id'), primary_key=True),
-    Column('call_id', ForeignKey('calls.id'), primary_key=True)
+    Column('user_id', ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    Column('call_id', ForeignKey('calls.id', ondelete='CASCADE'), primary_key=True)
 )
-
-# class CallsUsers(Base):
-#     __tablename__ = 'calls_users'
-#     user_id = Column(ForeignKey('books.id'), primary_key=True)
-#     call_id = Column(ForeignKey('calls.id'), primary_key=True)
-
 
 users_contacts = Table(
     'users_contacts', Base.metadata,
-    Column('user_id', ForeignKey('users.id'), primary_key=True),
-    Column('contact_id', ForeignKey('users.id'), primary_key=True)
+    Column('user_id', ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    Column('contact_id', ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
 )
 
 
@@ -36,8 +29,8 @@ class Call(Base):
     duration = Column(Integer)
     owner_id = Column(Integer, ForeignKey('users.id'))
 
-    owner = relationship('User', back_populates='owned_calls', cascade="all,delete")
-    users = relationship('User', secondary=calls_users, back_populates='calls', cascade="all,delete")
+    owner = relationship('User', back_populates='owned_calls', cascade='all,delete')
+    users = relationship('User', secondary=calls_users, back_populates='calls', cascade='all,delete')
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -55,9 +48,9 @@ class User(Base):
     password_salt = Column(String)
     profile_picture = Column(String)
 
-    owned_calls = relationship('Call', back_populates='owner', cascade="all,delete")
-    calls = relationship('Call', secondary=calls_users, back_populates='users', cascade="all,delete")
-    contacts = relationship('User', secondary=users_contacts, back_populates='contacts', cascade="all,delete",
+    owned_calls = relationship('Call', back_populates='owner', cascade='all,delete')
+    calls = relationship('Call', secondary=calls_users, back_populates='users', cascade='all,delete')
+    contacts = relationship('User', secondary=users_contacts, back_populates='contacts', cascade='all,delete',
                             primaryjoin=(users_contacts.c.user_id == id),
                             secondaryjoin=(users_contacts.c.contact_id == id))
 
