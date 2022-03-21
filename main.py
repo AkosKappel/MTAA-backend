@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from api import models
-from api.routers import call, user, contact, file
+from api.routers import authentication, call, user, contact, file
 from core.config import settings
 from core.database import engine
 
@@ -20,6 +20,7 @@ def get_application():
         allow_headers=['*'],
     )
 
+    _app.include_router(authentication.router)
     _app.include_router(user.router)
     _app.include_router(call.router)
     _app.include_router(contact.router)

@@ -7,9 +7,11 @@ load_dotenv(dotenv_path=env_path)
 
 
 class Settings:
+    # project settings
     PROJECT_NAME: str = 'Meetuj'
     PROJECT_VERSION: str = '1.0.0'
 
+    # database config
     POSTGRES_USER: str = os.getenv('POSTGRES_USER')
     POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
     POSTGRES_SERVER: str = os.getenv('POSTGRES_SERVER', 'localhost')
@@ -21,6 +23,11 @@ class Settings:
     SECRET_KEY = 'ccccde617c75da86d9b3f10ff36051d35957016dbcae181f60cc6cc72ff9acad'
     ALGORITHM = 'HS256'
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+    # profile picture settings
+    IMAGES_FOLDER = 'images/'
+    IMAGE_EXTENSION = '.jpg'
+    DEFAULT_PROFILE_PICTURE = f'{IMAGES_FOLDER}default{IMAGE_EXTENSION}'
 
 
 settings = Settings()

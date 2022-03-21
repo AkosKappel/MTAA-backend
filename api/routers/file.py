@@ -1,21 +1,21 @@
-from fastapi import APIRouter, File
+from fastapi import APIRouter, File, Depends, status
 from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
+
+from api import crud
+from core.database import get_db
 
 router = APIRouter(
     tags=['Files'],
+    prefix='/file',
 )
 
 
-@router.get('/downloadfile', response_class=FileResponse)
-def download_file():
-    # with open('images/' + 'test1.jpg', 'wb') as f:
-    #     image = f.read()
-    # return {'file_size': len(image)}
-    return FileResponse('images/' + 'test1.jpg')
+@router.get('/download/{user_id}', response_class=FileResponse, status_code=status.HTTP_200_OK)
+def download_profile_image(user_id: int, db: Session = Depends(get_db)):
+    return crud.download_profile_image(user_id=user_id, db=db)
 
 
-@router.post('/uploadfile/')
-def create_upload_file(image: bytes = File(...)):
-    with open('images/' + 'test1.jpg', 'wb') as f:
-        f.write(image)
-    return {'file_size': len(image)}
+@router.put('/upload/{user_id}')
+def upload_profile_image(user_id: int, image: bytes = File(...), db: Session = Depends(get_db)):
+    return crud.upload_profile_image(user_id=user_id, image=image, db=db)
