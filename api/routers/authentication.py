@@ -1,3 +1,5 @@
+import re
+
 from fastapi import Depends, APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -12,6 +14,19 @@ router = APIRouter(
 
 @router.post('/register/', response_model=schemas.User, status_code=status.HTTP_201_CREATED)
 def register(request: schemas.UserCreate, db: Session = Depends(get_db)):
+    if not re.match(r'^[.\w-]+@([\w-]+\.)+[\w-]{2,4}$', request.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Incorrect email address.',
+        )
+
+    min_pw_length = 7
+    if len(request.password) < min_pw_length:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Password too short. Must be at least {min_pw_length} characters.',
+        )
+
     db_user = db.query(models.User).filter(models.User.email == request.email).first()
 
     if db_user:

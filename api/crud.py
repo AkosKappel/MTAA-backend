@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 
 from fastapi import HTTPException, status
@@ -109,6 +110,19 @@ def get_calls_of_user(db: Session, user_id: int):
 def create_call_for_user(user_id: int, db: Session, call: schemas.CallCreate):
     db_user = get_user_by_id(user_id=user_id, db=db)
     db_call = models.Call(**call.dict(), owner_id=user_id)
+
+    zero_time = timedelta(minutes=0)
+    new_call_start = db_call.date
+    new_call_end = db_call.date + timedelta(minutes=db_call.duration)
+    for c in db_user.owned_calls:
+        old_call_start = c.date
+        old_call_end = c.date + timedelta(minutes=c.duration)
+        if min(new_call_end, old_call_end) - max(new_call_start, old_call_start) > zero_time:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f'You already have a scheduled meeting in this timeslot',
+            )
+
     db_call.users.append(db_user)
 
     db.add(db_call)
@@ -264,4 +278,3 @@ def upload_profile_image(user_id: int, image: bytes, db: Session):
 
     user.update({'profile_picture': str(file_path)})
     db.commit()
-    return user.first()

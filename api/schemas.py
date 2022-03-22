@@ -65,7 +65,6 @@ class CallUpdate(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    profile_picture: str | None = None
     email: str | None = None
     password: str | None = None
 
