@@ -19,7 +19,7 @@ def login(request: OAuth2PasswordRequestForm, db: Session):
             detail=f'Incorrect password'
         )
 
-    access_token = JWT.create_access_token(data={'sub': db_user.email})
+    access_token = JWT.create_access_token(data={'user_id': db_user.id})
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
