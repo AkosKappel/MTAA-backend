@@ -11,16 +11,16 @@ router = APIRouter(
 )
 
 
-@router.get('/download/{user_id}', response_class=FileResponse, status_code=status.HTTP_200_OK)
-def download_profile_image(user_id: int,
-                           db: Session = Depends(get_db),
+@router.get('/download', response_class=FileResponse, status_code=status.HTTP_200_OK)
+def download_profile_image(db: Session = Depends(get_db),
                            current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    user_id: int = current_user.user_id
     return crud.download_profile_image(user_id=user_id, db=db)
 
 
-@router.put('/upload/{user_id}', status_code=status.HTTP_200_OK)
-def upload_profile_image(user_id: int,
-                         image: bytes = File(...),
+@router.put('/upload', status_code=status.HTTP_204_NO_CONTENT)
+def upload_profile_image(image: bytes = File(...),
                          db: Session = Depends(get_db),
                          current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    user_id: int = current_user.user_id
     return crud.upload_profile_image(user_id=user_id, image=image, db=db)

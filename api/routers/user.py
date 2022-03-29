@@ -1,8 +1,7 @@
 from fastapi import Depends, APIRouter, status
 from sqlalchemy.orm import Session
 
-from api import crud, schemas
-from api import OAuth2
+from api import crud, schemas, OAuth2
 from core.database import get_db
 
 router = APIRouter(
@@ -11,53 +10,49 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=list[schemas.User])
+@router.get('/all', response_model=list[schemas.User], status_code=status.HTTP_200_OK)
 def get_all_users(skip: int = 0,
                   limit: int = 100,
                   db: Session = Depends(get_db),
-                  current_user=Depends(OAuth2.get_current_user)):
+                  current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
     return crud.get_all_users(db=db, skip=skip, limit=limit)
 
 
-@router.get('/{user_id}', response_model=schemas.User)
-def get_user_by_id(user_id: int,
-                   db: Session = Depends(get_db),
-                   current_user=Depends(OAuth2.get_current_user)):
+@router.get('', response_model=schemas.User, status_code=status.HTTP_200_OK)
+def get_user(email: str | None = None,
+             db: Session = Depends(get_db),
+             current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    if email is not None:
+        return crud.get_user_by_email(email=email, db=db)
+    user_id: int = current_user.user_id
     return crud.get_user_by_id(user_id=user_id, db=db)
 
 
-@router.get('/email/{email}', response_model=schemas.User)
-def get_user_by_email(email: str,
-                      db: Session = Depends(get_db),
-                      current_user=Depends(OAuth2.get_current_user)):
-    return crud.get_user_by_email(email=email, db=db)
-
-
-@router.put('/{user_id}', response_model=schemas.User, status_code=status.HTTP_200_OK)
-def update_user(user_id: int,
-                request: schemas.UserUpdate,
+@router.put('', response_model=schemas.User, status_code=status.HTTP_200_OK)
+def update_user(request: schemas.UserUpdate,
                 db: Session = Depends(get_db),
-                current_user=Depends(OAuth2.get_current_user)):
+                current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    user_id: int = current_user.user_id
     return crud.update_user(user_id=user_id, request=request, db=db)
 
 
-@router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: int,
-                db: Session = Depends(get_db),
-                current_user=Depends(OAuth2.get_current_user)):
+@router.delete('', status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(db: Session = Depends(get_db),
+                current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    user_id: int = current_user.user_id
     return crud.delete_user(user_id=user_id, db=db)
 
 
-@router.get('/{user_id}/calls', response_model=list[schemas.Call])
-def get_calls_of_user(user_id: int,
-                      db: Session = Depends(get_db),
-                      current_user=Depends(OAuth2.get_current_user)):
+@router.get('/calls', response_model=list[schemas.Call], status_code=status.HTTP_200_OK)
+def get_calls_of_user(db: Session = Depends(get_db),
+                      current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    user_id: int = current_user.user_id
     return crud.get_calls_of_user(user_id=user_id, db=db)
 
 
-@router.post('/{user_id}/calls', response_model=schemas.Call, status_code=status.HTTP_201_CREATED)
-def create_call_for_user(user_id: int,
-                         call: schemas.CallCreate,
+@router.post('/calls', response_model=schemas.Call, status_code=status.HTTP_201_CREATED)
+def create_call_for_user(call: schemas.CallCreate,
                          db: Session = Depends(get_db),
-                         current_user=Depends(OAuth2.get_current_user)):
+                         current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    user_id: int = current_user.user_id
     return crud.create_call_for_user(call=call, user_id=user_id, db=db)

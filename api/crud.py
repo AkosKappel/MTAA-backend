@@ -107,7 +107,7 @@ def get_calls_of_user(db: Session, user_id: int):
     return db_user.calls
 
 
-def create_call_for_user(user_id: int, db: Session, call: schemas.CallCreate):
+def create_call_for_user(db: Session, user_id: int, call: schemas.CallCreate):
     db_user = get_user_by_id(user_id=user_id, db=db)
     db_call = models.Call(**call.dict(), owner_id=user_id)
 
@@ -168,15 +168,15 @@ def get_contacts(db: Session, user_id: int):
     return db_user.contacts
 
 
-def add_contact(user_id: int, db: Session, request: schemas.Contact):
-    if user_id == request.contact_id:
+def add_contact(db: Session, user_id: int, contact_id: int):
+    if user_id == contact_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f'User can not be added as a contact',
         )
 
     db_user = get_user_by_id(user_id=user_id, db=db)
-    db_contact = get_user_by_id(user_id=request.contact_id, db=db)
+    db_contact = get_user_by_id(user_id=contact_id, db=db)
 
     if db_contact in db_user.contacts:
         raise HTTPException(
@@ -189,9 +189,9 @@ def add_contact(user_id: int, db: Session, request: schemas.Contact):
     return db_user.contacts
 
 
-def remove_contact(user_id, db: Session, request: schemas.Contact):
+def remove_contact(db: Session, user_id: int, contact_id: int):
     db_user = get_user_by_id(user_id=user_id, db=db)
-    db_contact = get_user_by_id(user_id=request.contact_id, db=db)
+    db_contact = get_user_by_id(user_id=contact_id, db=db)
 
     if db_contact not in db_user.contacts:
         raise HTTPException(
@@ -208,7 +208,7 @@ def get_all_calls(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Call).offset(skip).limit(limit).all()
 
 
-def get_call_by_id(call_id: int, db: Session):
+def get_call_by_id(db: Session, call_id: int):
     db_call = db.query(models.Call).filter(models.Call.id == call_id).first()
 
     if not db_call:
@@ -220,7 +220,7 @@ def get_call_by_id(call_id: int, db: Session):
     return db_call
 
 
-def update_call(call_id: int, request: schemas.CallUpdate, db: Session):
+def update_call(db: Session, call_id: int, request: schemas.CallUpdate):
     call = db.query(models.Call).filter(models.Call.id == call_id)
 
     if not call.first():
@@ -236,7 +236,7 @@ def update_call(call_id: int, request: schemas.CallUpdate, db: Session):
     return call.first()
 
 
-def remove_call(call_id: int, db: Session):
+def remove_call(db: Session, call_id: int):
     call = db.query(models.Call).filter(models.Call.id == call_id)
 
     if not call.first():
@@ -249,12 +249,12 @@ def remove_call(call_id: int, db: Session):
     db.commit()
 
 
-def get_users_of_call(call_id: int, db: Session):
+def get_users_of_call(db: Session, call_id: int):
     db_call = get_call_by_id(call_id=call_id, db=db)
     return db_call.users
 
 
-def download_profile_image(user_id: int, db: Session):
+def download_profile_image(db: Session, user_id: int):
     db_user = get_user_by_id(user_id=user_id, db=db)
     file_path = Path(db_user.profile_picture)
 
@@ -263,7 +263,7 @@ def download_profile_image(user_id: int, db: Session):
     return FileResponse(settings.DEFAULT_PROFILE_PICTURE)
 
 
-def upload_profile_image(user_id: int, image: bytes, db: Session):
+def upload_profile_image(db: Session, user_id: int, image: bytes):
     user = db.query(models.User).filter(models.User.id == user_id)
 
     if not user.first():

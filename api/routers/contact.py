@@ -10,22 +10,24 @@ router = APIRouter(
 )
 
 
-@router.get('/{user_id}', response_model=list[schemas.UserBase])
-def get_user_contacts(user_id: int,
-                      db: Session = Depends(get_db),
-                      current_user=Depends(OAuth2.get_current_user)):
+@router.get('', response_model=list[schemas.UserBase], status_code=status.HTTP_200_OK)
+def get_user_contacts(db: Session = Depends(get_db),
+                      current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    user_id: int = current_user.user_id
     return crud.get_contacts(user_id=user_id, db=db)
 
 
-@router.post('/{user_id}', response_model=list[schemas.UserBase], status_code=status.HTTP_200_OK)
-def add_user_contact(user_id: int, request: schemas.Contact,
+@router.post('/{contact_id}', response_model=list[schemas.UserBase], status_code=status.HTTP_200_OK)
+def add_user_contact(contact_id: int,
                      db: Session = Depends(get_db),
-                     current_user=Depends(OAuth2.get_current_user)):
-    return crud.add_contact(user_id=user_id, request=request, db=db)
+                     current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    user_id: int = current_user.user_id
+    return crud.add_contact(user_id=user_id, contact_id=contact_id, db=db)
 
 
-@router.delete('/{user_id}', response_model=list[schemas.UserBase], status_code=status.HTTP_200_OK)
-def remove_user_contact(user_id: int, request: schemas.Contact,
+@router.delete('/{contact_id}', response_model=list[schemas.UserBase], status_code=status.HTTP_200_OK)
+def remove_user_contact(contact_id: int,
                         db: Session = Depends(get_db),
-                        current_user=Depends(OAuth2.get_current_user)):
-    return crud.remove_contact(user_id=user_id, request=request, db=db)
+                        current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
+    user_id: int = current_user.user_id
+    return crud.remove_contact(user_id=user_id, contact_id=contact_id, db=db)

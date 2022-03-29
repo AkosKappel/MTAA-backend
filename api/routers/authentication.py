@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post('/register/', response_model=schemas.User, status_code=status.HTTP_201_CREATED)
+@router.post('/register', response_model=schemas.User, status_code=status.HTTP_201_CREATED)
 def register(request: schemas.UserCreate, db: Session = Depends(get_db)):
     if not re.match(r'^[.\w-]+@([\w-]+\.)+[\w-]{2,4}$', request.email):
         raise HTTPException(
@@ -38,6 +38,6 @@ def register(request: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(request=request, db=db)
 
 
-@router.post('/login/', response_model=schemas.Token, status_code=status.HTTP_202_ACCEPTED)
+@router.post('/login', response_model=schemas.Token, status_code=status.HTTP_202_ACCEPTED)
 def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     return crud.login(request=request, db=db)
