@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get('', response_model=list[schemas.Call], status_code=status.HTTP_200_OK)
+@router.get('/all', response_model=list[schemas.Call], status_code=status.HTTP_200_OK)
 def get_all_calls(skip: int = 0,
                   limit: int = 100,
                   db: Session = Depends(get_db),
