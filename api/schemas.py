@@ -38,6 +38,7 @@ class Call(BaseModel):
 class User(UserBase):
     calls: list[Call] = []
     profile_picture: str
+    created_at: datetime
 
     class Config:
         orm_mode = True
