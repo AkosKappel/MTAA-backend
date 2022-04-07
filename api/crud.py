@@ -1,3 +1,4 @@
+import re
 from datetime import timedelta
 from pathlib import Path
 
@@ -51,6 +52,32 @@ def get_user_by_email(db: Session, email: str):
     return db_user
 
 
+def validate_email_format(email: str):
+    if not re.match(settings.EMAIL_REGEX, email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Incorrect email address.',
+        )
+
+
+def validate_password_length(password: str):
+    min_pw_length = settings.MIN_PASSWORD_LENGTH
+    if len(password) < min_pw_length:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Password too short. Must be at least {min_pw_length} characters.',
+        )
+
+
+def validate_unique_email(email: str, db: Session):
+    db_user = db.query(models.User).filter(models.User.email == email).first()
+    if db_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Email already registered',
+        )
+
+
 def create_user(db: Session, request: schemas.UserCreate):
     salt = hashing.generate_salt()
     db_user = models.User(
@@ -77,8 +104,13 @@ def update_user(db: Session, user_id: int, request: schemas.UserUpdate):
 
     params = {k: v for k, v in request.dict().items() if v}
 
+    if 'email' in params:
+        validate_email_format(email=request.email)
+        validate_unique_email(email=request.email, db=db)
+
     if 'password' in params:
         password = params['password']
+        validate_password_length(password=request.password)
         del params['password']
         salt = hashing.generate_salt()
         params['password_hash'] = hashing.bcrypt(password, salt)

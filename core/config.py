@@ -19,10 +19,14 @@ class Settings:
     POSTGRES_DB: str = os.getenv('POSTGRES_DB')
     DATABASE_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}'
 
+    # user settings
+    EMAIL_REGEX: str = r'^[.\w-]+@([\w-]+\.)+[\w-]{2,4}$'
+    MIN_PASSWORD_LENGTH: int = 7
+
     # command pre vygenerovanie secret key: openssl rand -hex 32
     SECRET_KEY = 'ccccde617c75da86d9b3f10ff36051d35957016dbcae181f60cc6cc72ff9acad'
     ALGORITHM = 'HS256'
-    ACCESS_TOKEN_EXPIRE_MINUTES = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES = 10_080  # 60 * 24 * 7 = 10_080 minutes = 1 week
 
     # profile picture settings
     IMAGES_FOLDER = 'images/'
