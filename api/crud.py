@@ -177,7 +177,7 @@ def add_user_to_call(db: Session, user_id: int, call_id: int):
     db_call.users.append(db_user)
     db.commit()
     db.refresh(db_call)
-    return db_call
+    return db_call.users
 
 
 def remove_user_from_call(db: Session, user_id: int, call_id: int):
@@ -193,7 +193,7 @@ def remove_user_from_call(db: Session, user_id: int, call_id: int):
     db_call.users.remove(db_user)
     db.commit()
     db.refresh(db_call)
-    return db_call
+    return db_call.users
 
 
 def get_contacts(db: Session, user_id: int):

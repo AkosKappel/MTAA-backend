@@ -47,7 +47,7 @@ def get_users_of_call(call_id: int,
     return crud.get_users_of_call(call_id=call_id, db=db)
 
 
-@router.post('/{call_id}/users/{user_id}', response_model=schemas.CallUsers, status_code=status.HTTP_200_OK)
+@router.post('/{call_id}/users/{user_id}', response_model=list[schemas.UserBase], status_code=status.HTTP_200_OK)
 def add_user_to_call(call_id: int,
                      user_id: int,
                      db: Session = Depends(get_db),
@@ -55,7 +55,7 @@ def add_user_to_call(call_id: int,
     return crud.add_user_to_call(call_id=call_id, user_id=user_id, db=db)
 
 
-@router.delete('/{call_id}/users/{user_id}', response_model=schemas.CallUsers, status_code=status.HTTP_200_OK)
+@router.delete('/{call_id}/users/{user_id}', response_model=list[schemas.UserBase], status_code=status.HTTP_200_OK)
 def remove_user_from_call(call_id: int,
                           user_id: int,
                           db: Session = Depends(get_db),
