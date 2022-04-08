@@ -30,14 +30,16 @@ def update_call(call_id: int,
                 request: schemas.CallUpdate,
                 db: Session = Depends(get_db),
                 current_user=Depends(OAuth2.get_current_user)):
-    return crud.update_call(call_id=call_id, request=request, db=db)
+    user_id: int = current_user.user_id
+    return crud.update_call(call_id=call_id, user_id=user_id, request=request, db=db)
 
 
 @router.delete('/{call_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_call(call_id: int,
                 db: Session = Depends(get_db),
                 current_user=Depends(OAuth2.get_current_user)):
-    return crud.remove_call(call_id=call_id, db=db)
+    user_id: int = current_user.user_id
+    return crud.remove_call(call_id=call_id, user_id=user_id, db=db)
 
 
 @router.get('/{call_id}/users', response_model=list[schemas.UserBase], status_code=status.HTTP_200_OK)

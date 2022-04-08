@@ -253,13 +253,19 @@ def get_call_by_id(db: Session, call_id: int):
     return db_call
 
 
-def update_call(db: Session, call_id: int, request: schemas.CallUpdate):
+def update_call(db: Session, call_id: int, user_id: int, request: schemas.CallUpdate):
     call = db.query(models.Call).filter(models.Call.id == call_id)
 
     if not call.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Call not found',
+        )
+
+    if call.first().owner_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f'Only owner can update this call',
         )
 
     params = {k: v for k, v in request.dict().items() if v}
@@ -269,13 +275,19 @@ def update_call(db: Session, call_id: int, request: schemas.CallUpdate):
     return call.first()
 
 
-def remove_call(db: Session, call_id: int):
+def remove_call(db: Session, call_id: int, user_id: int):
     call = db.query(models.Call).filter(models.Call.id == call_id)
 
     if not call.first():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Call not found',
+        )
+
+    if call.first().owner_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f'Only owner can delete this call',
         )
 
     call.delete(synchronize_session=False)
