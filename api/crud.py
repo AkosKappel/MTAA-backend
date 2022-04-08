@@ -106,7 +106,8 @@ def update_user(db: Session, user_id: int, request: schemas.UserUpdate):
 
     if 'email' in params:
         validate_email_format(email=request.email)
-        validate_unique_email(email=request.email, db=db)
+        if params['email'] != user.first().email:
+            validate_unique_email(email=request.email, db=db)
 
     if 'password' in params:
         password = params['password']
