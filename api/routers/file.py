@@ -18,7 +18,7 @@ def download_profile_image(db: Session = Depends(get_db),
     return crud.download_profile_image(user_id=user_id, db=db)
 
 
-@router.put('/upload', status_code=status.HTTP_204_NO_CONTENT)
+@router.put('/upload')
 def upload_profile_image(image: bytes = File(...),
                          db: Session = Depends(get_db),
                          current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):

@@ -36,7 +36,7 @@ def update_user(request: schemas.UserUpdate,
     return crud.update_user(user_id=user_id, request=request, db=db)
 
 
-@router.delete('', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('')
 def delete_user(db: Session = Depends(get_db),
                 current_user: schemas.TokenData = Depends(OAuth2.get_current_user)):
     user_id: int = current_user.user_id

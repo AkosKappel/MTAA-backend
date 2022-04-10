@@ -34,7 +34,7 @@ def update_call(call_id: int,
     return crud.update_call(call_id=call_id, user_id=user_id, request=request, db=db)
 
 
-@router.delete('/{call_id}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/{call_id}')
 def delete_call(call_id: int,
                 db: Session = Depends(get_db),
                 current_user=Depends(OAuth2.get_current_user)):
