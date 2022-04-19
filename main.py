@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
-from api import models
+from api import models, websocket
 from api.routers import authentication, call, user, contact, file
 from core.config import settings
 from core.database import engine
@@ -25,6 +25,7 @@ def get_application():
     _app.include_router(call.router)
     _app.include_router(contact.router)
     _app.include_router(file.router)
+    _app.include_router(websocket.router)
 
     return _app
 
