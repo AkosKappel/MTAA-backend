@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from api import crud, schemas
+from core import validator
 from core.database import get_db
 
 router = APIRouter(
@@ -12,9 +13,9 @@ router = APIRouter(
 
 @router.post('/register', response_model=schemas.User, status_code=status.HTTP_201_CREATED)
 def register(request: schemas.UserCreate, db: Session = Depends(get_db)):
-    crud.validate_email_format(email=request.email)
-    crud.validate_password_length(password=request.password)
-    crud.validate_unique_email(email=request.email, db=db)
+    validator.validate_email_format(email=request.email)
+    validator.validate_password_length(password=request.password)
+    validator.validate_unique_email(email=request.email, db=db)
     return crud.create_user(request=request, db=db)
 
 
